@@ -57,7 +57,7 @@ const TESTIMONIALS = [
   { name: 'Rohit S.', branch: 'Mechanical Engineering', quote: 'Finally an AI that actually explains engineering concepts clearly, not just Wikipedia definitions.' },
 ]
 
-export default function LandingPage({ dark, onToggleDark }) {
+export default function LandingPage({ dark, onToggleDark, isLoggedIn, user, onLogout }) {
   return (
     <div className="min-h-screen mesh-bg">
 
@@ -67,16 +67,28 @@ export default function LandingPage({ dark, onToggleDark }) {
         <div className="max-w-6xl mx-auto px-5 py-3.5 flex items-center justify-between">
           <Logo size="sm" />
           <div className="flex items-center gap-4">
-            <DarkModeToggle dark={dark} onToggle={() => onToggleDark(d => !d)} />
-            <Link to="/login"
-              className="hidden sm:block text-sm font-medium text-muted hover:text-theme transition-colors">
-              Log in
-            </Link>
-            <Link to="/signup"
-              className="text-sm font-semibold text-white px-4 py-2 rounded-xl transition-all hover:shadow-glow-sm"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
-              Get Started Free
-            </Link>
+            <DarkModeToggle dark={dark} onToggle={onToggleDark} />
+            {isLoggedIn ? (
+              <div className="flex items-center gap-2">
+                <Link to="/chat"
+                  className="text-sm font-semibold text-white px-4 py-2 rounded-xl transition-all hover:shadow-glow-sm"
+                  style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
+                  Go to Chat →
+                </Link>
+              </div>
+            ) : (
+              <>
+                <Link to="/login"
+                  className="hidden sm:block text-sm font-medium text-muted hover:text-theme transition-colors">
+                  Log in
+                </Link>
+                <Link to="/signup"
+                  className="text-sm font-semibold text-white px-4 py-2 rounded-xl transition-all hover:shadow-glow-sm"
+                  style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
+                  Get Started Free
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>

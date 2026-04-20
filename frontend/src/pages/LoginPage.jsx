@@ -3,13 +3,13 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight } from 'lucide-react'
-import Logo   from '../components/ui/Logo'
-import Button from '../components/ui/Button'
-import Input  from '../components/ui/Input'
+import Logo           from '../components/ui/Logo'
+import Button         from '../components/ui/Button'
+import Input          from '../components/ui/Input'
 import DarkModeToggle from '../components/ui/DarkModeToggle'
 
-export default function LoginPage({ dark, onToggleDark, onLogin }) {
-  const [email, setEmail]     = useState('')
+export default function LoginPage({ dark, onToggleDark, onLogin, onContinueGuest }) {
+  const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [showPass, setShowPass] = useState(false)
   const [loading, setLoading]   = useState(false)
@@ -20,30 +20,29 @@ export default function LoginPage({ dark, onToggleDark, onLogin }) {
     e.preventDefault()
     setError('')
     if (!email || !password) { setError('Please fill in all fields.'); return }
+    if (password.length < 6)  { setError('Password must be at least 6 characters.'); return }
     setLoading(true)
-    // Simulate API call
-    await new Promise(r => setTimeout(r, 1200))
+    await new Promise(r => setTimeout(r, 1000))
     setLoading(false)
-    onLogin?.()
+    onLogin?.(email)
+    navigate('/chat')
+  }
+
+  const handleGuest = () => {
+    onContinueGuest?.()
     navigate('/chat')
   }
 
   return (
     <div className="min-h-screen mesh-bg flex flex-col">
-      {/* Navbar */}
       <nav className="flex items-center justify-between px-6 py-4">
         <Link to="/"><Logo size="sm" /></Link>
-        <DarkModeToggle dark={dark} onToggle={() => onToggleDark(d => !d)} />
+        <DarkModeToggle dark={dark} onToggle={onToggleDark} />
       </nav>
 
-      {/* Form container */}
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md animate-slide-up">
-          {/* Card */}
-          <div
-            className="rounded-3xl border border-theme p-8 shadow-xl"
-            style={{ background: 'var(--bg-card)' }}
-          >
+          <div className="rounded-3xl border border-theme p-8 shadow-xl" style={{ background: 'var(--bg-card)' }}>
             {/* Header */}
             <div className="text-center mb-8">
               <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
@@ -54,14 +53,12 @@ export default function LoginPage({ dark, onToggleDark, onLogin }) {
               <p className="text-muted text-sm mt-1">Log in to continue studying</p>
             </div>
 
-            {/* Error */}
             {error && (
               <div className="mb-4 px-4 py-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">
                 {error}
               </div>
             )}
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input
                 label="Email address"
@@ -92,18 +89,12 @@ export default function LoginPage({ dark, onToggleDark, onLogin }) {
               </div>
 
               <div className="flex justify-end">
-                <Link to="/forgot-password" className="text-xs text-brand-500 hover:underline">
+                <button type="button" className="text-xs text-brand-500 hover:underline cursor-pointer">
                   Forgot password?
-                </Link>
+                </button>
               </div>
 
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                className="w-full mt-2"
-                disabled={loading}
-              >
+              <Button type="submit" variant="primary" size="lg" className="w-full mt-2" disabled={loading}>
                 {loading ? (
                   <span className="flex items-center gap-2">
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -115,26 +106,18 @@ export default function LoginPage({ dark, onToggleDark, onLogin }) {
               </Button>
             </form>
 
-            {/* Divider */}
             <div className="flex items-center gap-3 my-6">
               <div className="flex-1 h-px border-t border-theme" />
               <span className="text-xs text-muted">or</span>
               <div className="flex-1 h-px border-t border-theme" />
             </div>
 
-            {/* Social / Guest login */}
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-full"
-              onClick={() => { onLogin?.(); navigate('/chat') }}
-            >
+            <Button variant="outline" size="lg" className="w-full" onClick={handleGuest}>
               <Sparkles size={16} className="text-brand-500" />
               Continue without account
             </Button>
           </div>
 
-          {/* Sign up link */}
           <p className="text-center text-sm text-muted mt-6">
             Don't have an account?{' '}
             <Link to="/signup" className="text-brand-500 font-medium hover:underline">

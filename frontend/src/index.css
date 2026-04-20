@@ -14,7 +14,9 @@
   --border:       #e2e5f1;
   --text-primary: #0f1117;
   --text-muted:   #6b7280;
-  --brand:        #6366f1;
+  --brand:         #6366f1;
+  --brand-primary: #6366f1;
+  --brand-secondary:#8b5cf6;
   --brand-light:  #e0e7ff;
   --violet:       #8b5cf6;
   --scrollbar-thumb: #c7d2fe;

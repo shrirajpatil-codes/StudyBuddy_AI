@@ -1,8 +1,9 @@
-// App.jsx — Root component: theme provider + routing
+// App.jsx — Root component: unified auth + settings + routing
 
-import React, { useState } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
-import useDarkMode from './hooks/useDarkMode'
+import React from 'react'
+import { Routes, Route } from 'react-router-dom'
+import useAuth     from './hooks/useAuth'
+import useSettings from './hooks/useSettings'
 
 import LandingPage  from './pages/LandingPage'
 import ChatPage     from './pages/ChatPage'
@@ -13,25 +14,41 @@ import SettingsPage from './pages/SettingsPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 export default function App() {
-  const [dark, setDark] = useDarkMode()
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  // ── Auth ────────────────────────────────────────
+  const auth = useAuth()
 
-  const sharedProps = { dark, onToggleDark: setDark }
+  // ── Settings (dark mode, theme, font size, etc.) ─
+  const { settings, update, toggleDark, setTheme, setFontSize, resetSettings } = useSettings()
+
+  // Props shared with every page
+  const sharedProps = {
+    // auth
+    user:             auth.user,
+    isLoggedIn:       auth.isLoggedIn,
+    onLogin:          auth.login,
+    onContinueGuest:  auth.continueAsGuest,
+    onLogout:         auth.logout,
+    onUpdateProfile:  auth.updateProfile,
+    // settings
+    settings,
+    onUpdateSettings: update,
+    onToggleDark:     toggleDark,
+    onSetTheme:       setTheme,
+    onSetFontSize:    setFontSize,
+    onResetSettings:  resetSettings,
+    // convenience aliases still used in some pages
+    dark: settings.dark,
+  }
 
   return (
     <Routes>
-      {/* Public */}
-      <Route path="/"       element={<LandingPage  {...sharedProps} />} />
-      <Route path="/login"  element={<LoginPage    {...sharedProps} onLogin={() => setIsLoggedIn(true)} />} />
-      <Route path="/signup" element={<SignupPage   {...sharedProps} onLogin={() => setIsLoggedIn(true)} />} />
-
-      {/* App (accessible without login — guest mode) */}
-      <Route path="/chat"     element={<ChatPage     {...sharedProps} />} />
-      <Route path="/profile"  element={<ProfilePage  {...sharedProps} />} />
-      <Route path="/settings" element={<SettingsPage {...sharedProps} />} />
-
-      {/* Fallback */}
-      <Route path="*" element={<NotFoundPage />} />
+      <Route path="/"        element={<LandingPage  {...sharedProps} />} />
+      <Route path="/login"   element={<LoginPage    {...sharedProps} />} />
+      <Route path="/signup"  element={<SignupPage   {...sharedProps} />} />
+      <Route path="/chat"    element={<ChatPage     {...sharedProps} />} />
+      <Route path="/profile" element={<ProfilePage  {...sharedProps} />} />
+      <Route path="/settings"element={<SettingsPage {...sharedProps} />} />
+      <Route path="*"        element={<NotFoundPage />} />
     </Routes>
   )
 }

@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight, GraduationCap } from 'lucide-react'
-import Logo   from '../components/ui/Logo'
-import Button from '../components/ui/Button'
-import Input  from '../components/ui/Input'
+import { Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight } from 'lucide-react'
+import Logo           from '../components/ui/Logo'
+import Button         from '../components/ui/Button'
+import Input          from '../components/ui/Input'
 import DarkModeToggle from '../components/ui/DarkModeToggle'
 
 const BRANCHES = [
@@ -14,26 +14,24 @@ const BRANCHES = [
   'AIDS / AIML', 'Other',
 ]
 
-export default function SignupPage({ dark, onToggleDark, onLogin }) {
+export default function SignupPage({ dark, onToggleDark, onLogin, onContinueGuest }) {
   const [form, setForm]     = useState({ name: '', email: '', password: '', branch: '' })
   const [showPass, setShowPass] = useState(false)
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState('')
   const navigate = useNavigate()
 
-  const update = (k, v) => setForm(f => ({ ...f, [k]: v }))
+  const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    if (!form.name || !form.email || !form.password)
-      return setError('Please fill in all required fields.')
-    if (form.password.length < 6)
-      return setError('Password must be at least 6 characters.')
+    if (!form.name || !form.email || !form.password) { setError('Please fill in all required fields.'); return }
+    if (form.password.length < 6) { setError('Password must be at least 6 characters.'); return }
     setLoading(true)
-    await new Promise(r => setTimeout(r, 1400))
+    await new Promise(r => setTimeout(r, 1000))
     setLoading(false)
-    onLogin?.()
+    onLogin?.(form.email, form.name)
     navigate('/chat')
   }
 
@@ -41,21 +39,19 @@ export default function SignupPage({ dark, onToggleDark, onLogin }) {
     <div className="min-h-screen mesh-bg flex flex-col">
       <nav className="flex items-center justify-between px-6 py-4">
         <Link to="/"><Logo size="sm" /></Link>
-        <DarkModeToggle dark={dark} onToggle={() => onToggleDark(d => !d)} />
+        <DarkModeToggle dark={dark} onToggle={onToggleDark} />
       </nav>
 
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md animate-slide-up">
           <div className="rounded-3xl border border-theme p-8 shadow-xl" style={{ background: 'var(--bg-card)' }}>
-
-            {/* Header */}
             <div className="text-center mb-8">
               <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
                 style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 4px 20px rgba(99,102,241,0.35)' }}>
-                <GraduationCap size={24} color="white" />
+                <Sparkles size={24} color="white" />
               </div>
-              <h1 className="font-display font-bold text-2xl text-theme">Create your account</h1>
-              <p className="text-muted text-sm mt-1">Free forever · No credit card required</p>
+              <h1 className="font-display font-bold text-2xl text-theme">Create account</h1>
+              <p className="text-muted text-sm mt-1">Join thousands of engineering students</p>
             </div>
 
             {error && (
@@ -65,55 +61,25 @@ export default function SignupPage({ dark, onToggleDark, onLogin }) {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <Input
-                label="Full Name"
-                type="text"
-                placeholder="Your name"
-                value={form.name}
-                onChange={e => update('name', e.target.value)}
-                icon={<User size={16} />}
-              />
-              <Input
-                label="College Email"
-                type="email"
-                placeholder="you@college.edu"
-                value={form.email}
-                onChange={e => update('email', e.target.value)}
-                icon={<Mail size={16} />}
-              />
+              <Input label="Full Name *" type="text" placeholder="Arjun Patil"
+                value={form.name} onChange={set('name')} icon={<User size={16} />} />
+              <Input label="Email address *" type="email" placeholder="you@college.edu"
+                value={form.email} onChange={set('email')} icon={<Mail size={16} />} autoComplete="email" />
               <div className="relative">
-                <Input
-                  label="Password"
-                  type={showPass ? 'text' : 'password'}
-                  placeholder="Min 6 characters"
-                  value={form.password}
-                  onChange={e => update('password', e.target.value)}
-                  icon={<Lock size={16} />}
-                />
+                <Input label="Password *" type={showPass ? 'text' : 'password'} placeholder="Min. 6 characters"
+                  value={form.password} onChange={set('password')} icon={<Lock size={16} />} autoComplete="new-password" />
                 <button type="button" onClick={() => setShowPass(s => !s)}
-                  className="absolute right-3 top-[38px] text-muted hover:text-theme transition-colors cursor-pointer">
+                  className="absolute right-3 top-[38px] text-muted hover:text-theme cursor-pointer">
                   {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-
-              {/* Branch selector */}
               <div>
-                <label className="block text-sm font-medium text-theme mb-1.5">
-                  Engineering Branch <span className="text-muted text-xs">(optional)</span>
-                </label>
-                <select
-                  value={form.branch}
-                  onChange={e => update('branch', e.target.value)}
-                  className="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/20
-                    transition-all cursor-pointer"
-                  style={{
-                    background: 'var(--bg-card)',
-                    borderColor: 'var(--border)',
-                    color: form.branch ? 'var(--text-primary)' : 'var(--text-muted)',
-                  }}
-                >
+                <label className="block text-sm font-medium text-theme mb-1.5">Branch (optional)</label>
+                <select value={form.branch} onChange={set('branch')}
+                  className="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/20"
+                  style={{ background: 'var(--bg-card)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
                   <option value="">Select your branch</option>
-                  {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
+                  {BRANCHES.map(b => <option key={b}>{b}</option>)}
                 </select>
               </div>
 
@@ -124,16 +90,22 @@ export default function SignupPage({ dark, onToggleDark, onLogin }) {
                     Creating account…
                   </span>
                 ) : (
-                  <><Sparkles size={16} /> Create Account <ArrowRight size={16} /></>
+                  <>Create Account <ArrowRight size={16} /></>
                 )}
               </Button>
             </form>
 
-            <p className="text-center text-xs text-muted mt-4">
-              By signing up you agree to our{' '}
-              <Link to="/terms" className="text-brand-500 hover:underline">Terms</Link> and{' '}
-              <Link to="/privacy" className="text-brand-500 hover:underline">Privacy Policy</Link>.
-            </p>
+            <div className="flex items-center gap-3 my-6">
+              <div className="flex-1 h-px border-t border-theme" />
+              <span className="text-xs text-muted">or</span>
+              <div className="flex-1 h-px border-t border-theme" />
+            </div>
+
+            <Button variant="outline" size="lg" className="w-full"
+              onClick={() => { onContinueGuest?.(); navigate('/chat') }}>
+              <Sparkles size={16} className="text-brand-500" />
+              Continue without account
+            </Button>
           </div>
 
           <p className="text-center text-sm text-muted mt-6">
