@@ -1,6 +1,6 @@
 # 📚 StudyBuddy AI
 
-> A full-stack AI-powered academic assistant for engineering students  
+> A full-stack AI-powered academic assistant for engineering students
 > Built with React + Node.js + Express + MongoDB + Google Gemini AI
 
 ![React](https://img.shields.io/badge/React-18-61dafb?logo=react)
@@ -28,65 +28,56 @@
 ---
 
 ## 🗂️ Project Structure
+
+```
 StudyBuddy_AI/
+│
 ├── backend/
 │   ├── config/
-│   │   ├── db.js                  # MongoDB connection
-│   │   └── gemini.js              # Google Gemini AI setup
+│   │   ├── db.js
+│   │   └── gemini.js
 │   ├── controllers/
-│   │   ├── authController.js      # Register, Login, Profile
-│   │   └── chatController.js      # Gemini API + Chat history
+│   │   ├── authController.js
+│   │   └── chatController.js
 │   ├── middleware/
-│   │   └── authMiddleware.js      # JWT token verification
+│   │   └── authMiddleware.js
 │   ├── models/
-│   │   ├── User.js                # User schema
-│   │   └── Chat.js                # Chat history schema
+│   │   ├── Chat.js
+│   │   └── User.js
 │   ├── routes/
-│   │   ├── auth.js                # /api/auth/* routes
-│   │   └── chat.js                # /api/chat/* routes
-│   ├── .env.example               # Environment variables template
-│   ├── server.js                  # Express server entry point
-│   └── package.json
+│   │   ├── auth.js
+│   │   └── chat.js
+│   ├── tests/
+│   │   └── testOpenAI.js
+│   ├── .env.example
+│   ├── .gitignore
+│   ├── package.json
+│   ├── package-lock.json
+│   └── server.js
 │
-└── frontend/
-└── src/
-├── components/
-│   ├── chat/
-│   │   ├── AIAvatar.jsx
-│   │   ├── ChatBubble.jsx
-│   │   ├── ChatInput.jsx
-│   │   ├── TypingIndicator.jsx
-│   │   └── WelcomeScreen.jsx
-│   ├── layout/
-│   │   ├── Navbar.jsx
-│   │   └── Sidebar.jsx
-│   └── ui/
-│       ├── Badge.jsx
-│       ├── Button.jsx
-│       ├── DarkModeToggle.jsx
-│       ├── Input.jsx
-│       ├── Logo.jsx
-│       └── ModeSelector.jsx
-├── hooks/
-│   ├── useAuth.js         # Auth state + real API calls
-│   ├── useChat.js         # Chat state + Gemini API calls
-│   ├── useDarkMode.js
-│   └── useSettings.js
-├── pages/
-│   ├── ChatPage.jsx
-│   ├── LandingPage.jsx
-│   ├── LoginPage.jsx
-│   ├── SignupPage.jsx
-│   ├── ProfilePage.jsx
-│   ├── SettingsPage.jsx
-│   └── NotFoundPage.jsx
-├── utils/
-│   ├── formatTime.js
-│   └── nanoid.js
-├── api.js                 # Axios instance + API calls
-├── App.jsx
-├── main.jsx
-└── index.css
+├── frontend/
+│   ├── public/
+│   │   └── favicon.svg
+│   ├── src/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── pages/
+│   │   ├── utils/
+│   │   ├── api.js
+│   │   ├── App.jsx
+│   │   ├── index.css
+│   │   └── main.jsx
+│   ├── .gitignore
+│   ├── index.html
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── postcss.config.js
+│   ├── tailwind.config.js
+│   └── vite.config.js
+│
+└── README.md
+```
+
 ---
 
 ## 🚀 Getting Started
@@ -107,7 +98,6 @@ cd StudyBuddy_AI
 ---
 
 ### 2. Setup Backend
-
 ```bash
 cd backend
 npm install
@@ -134,6 +124,11 @@ node server.js
 ```
 
 Expected output:
+```
+✅ MongoDB Connected
+🚀 Server running on port 5000
+✅ Gemini Connected: Gemini connected successfully!
+```
 
 ---
 
@@ -216,6 +211,6 @@ Open [http://localhost:5173](http://localhost:5173)
 
 ## 🙏 Credits
 
-Built with ❤️ by **Shriraj Patil**  
-Powered by **Google Gemini AI** — Free tier  
-8-9 days of hardcore full-stack development 🚀
+Built with ❤️ by **Shriraj Patil**
+Powered by **Google Gemini AI** — Free tier
+7-8 days of hardcore full-stack development 🚀
