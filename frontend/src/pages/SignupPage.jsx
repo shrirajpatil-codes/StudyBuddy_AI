@@ -1,5 +1,4 @@
 // pages/SignupPage.jsx
-
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight } from 'lucide-react'
@@ -15,7 +14,7 @@ const BRANCHES = [
 ]
 
 export default function SignupPage({ dark, onToggleDark, onLogin, onContinueGuest }) {
-  const [form, setForm]     = useState({ name: '', email: '', password: '', branch: '' })
+  const [form, setForm]         = useState({ name: '', email: '', password: '', branch: '' })
   const [showPass, setShowPass] = useState(false)
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState('')
@@ -23,16 +22,32 @@ export default function SignupPage({ dark, onToggleDark, onLogin, onContinueGues
 
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
 
+  // ✅ REAL signup — calls backend API
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    if (!form.name || !form.email || !form.password) { setError('Please fill in all required fields.'); return }
-    if (form.password.length < 6) { setError('Password must be at least 6 characters.'); return }
+
+    if (!form.name || !form.email || !form.password) { 
+      setError('Please fill in all required fields.')
+      return 
+    }
+    if (form.password.length < 6) { 
+      setError('Password must be at least 6 characters.')
+      return 
+    }
+
     setLoading(true)
-    await new Promise(r => setTimeout(r, 1000))
+
+    // Call real backend signup via onLogin (which now calls signup)
+    const result = await onLogin?.(form.email, form.password, form.name)
+
     setLoading(false)
-    onLogin?.(form.email, form.name)
-    navigate('/chat')
+
+    if (result?.success) {
+      navigate('/chat')
+    } else {
+      setError(result?.error || 'Signup failed. Please try again.')
+    }
   }
 
   return (

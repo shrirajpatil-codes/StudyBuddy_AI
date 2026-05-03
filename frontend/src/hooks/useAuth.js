@@ -1,9 +1,16 @@
 // hooks/useAuth.js
-// Manages login state and user profile — persisted in localStorage
+// Manages login state — now connected to real backend API
 
 import { useState } from 'react'
+import { loginUser, signupUser } from '../api'
 
-const GUEST = { name: 'Guest', email: '', branch: '', year: '', isGuest: true }
+const GUEST = { 
+  name: 'Guest', 
+  email: '', 
+  branch: '', 
+  year: '', 
+  isGuest: true 
+}
 
 function loadUser() {
   try {
@@ -13,33 +20,87 @@ function loadUser() {
 }
 
 export default function useAuth() {
-  const [user, setUser] = useState(loadUser)
+  const [user, setUser]   = useState(loadUser)
+  const [authError, setAuthError] = useState('')
 
   const isLoggedIn = !!user
 
-  const login = (email, name = '') => {
-    const u = {
-      name: name || email.split('@')[0] || 'Student',
-      email,
-      branch: '',
-      year:   '',
-      isGuest: false,
-      loginAt: Date.now(),
+  // ✅ REAL login — calls backend /api/auth/login
+  const login = async (email, password) => {
+    setAuthError('')
+    try {
+      const res = await loginUser({ email, password })
+      const { token, user: userData } = res.data.data
+
+      // Save token for API calls
+      localStorage.setItem('token', token)
+
+      // Save user info
+      const u = {
+        id:      userData.id,
+        name:    userData.name,
+        email:   userData.email,
+        branch:  '',
+        year:    '',
+        isGuest: false,
+        loginAt: Date.now(),
+      }
+      setUser(u)
+      localStorage.setItem('sb-user', JSON.stringify(u))
+      return { success: true }
+
+    } catch (error) {
+      const msg = error.response?.data?.error || 'Login failed. Try again.'
+      setAuthError(msg)
+      return { success: false, error: msg }
     }
-    setUser(u)
-    try { localStorage.setItem('sb-user', JSON.stringify(u)) } catch {}
   }
 
+  // ✅ REAL signup — calls backend /api/auth/register
+  const signup = async (name, email, password) => {
+    setAuthError('')
+    try {
+      const res = await signupUser({ name, email, password })
+      const { token, user: userData } = res.data.data
+
+      // Save token for API calls
+      localStorage.setItem('token', token)
+
+      // Save user info
+      const u = {
+        id:      userData.id,
+        name:    userData.name,
+        email:   userData.email,
+        branch:  '',
+        year:    '',
+        isGuest: false,
+        loginAt: Date.now(),
+      }
+      setUser(u)
+      localStorage.setItem('sb-user', JSON.stringify(u))
+      return { success: true }
+
+    } catch (error) {
+      const msg = error.response?.data?.error || 'Signup failed. Try again.'
+      setAuthError(msg)
+      return { success: false, error: msg }
+    }
+  }
+
+  // ✅ Guest mode — no API call needed
   const continueAsGuest = () => {
     setUser(GUEST)
     try { localStorage.setItem('sb-user', JSON.stringify(GUEST)) } catch {}
   }
 
+  // ✅ Logout — clear everything
   const logout = () => {
     setUser(null)
-    try { localStorage.removeItem('sb-user') } catch {}
+    localStorage.removeItem('sb-user')
+    localStorage.removeItem('token')
   }
 
+  // ✅ Update profile locally
   const updateProfile = (patch) => {
     setUser(prev => {
       const updated = { ...prev, ...patch }
@@ -48,5 +109,14 @@ export default function useAuth() {
     })
   }
 
-  return { user, isLoggedIn, login, continueAsGuest, logout, updateProfile }
+  return { 
+    user, 
+    isLoggedIn, 
+    authError,
+    login, 
+    signup,
+    continueAsGuest, 
+    logout, 
+    updateProfile 
+  }
 }

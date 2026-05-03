@@ -1,10 +1,8 @@
 // App.jsx — Root component: unified auth + settings + routing
-
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
-import useAuth     from './hooks/useAuth'
-import useSettings from './hooks/useSettings'
-
+import useAuth      from './hooks/useAuth'
+import useSettings  from './hooks/useSettings'
 import LandingPage  from './pages/LandingPage'
 import ChatPage     from './pages/ChatPage'
 import LoginPage    from './pages/LoginPage'
@@ -17,18 +15,35 @@ export default function App() {
   // ── Auth ────────────────────────────────────────
   const auth = useAuth()
 
-  // ── Settings (dark mode, theme, font size, etc.) ─
-  const { settings, update, toggleDark, setTheme, setFontSize, resetSettings } = useSettings()
+  // ── Settings (dark mode, theme, font size, etc.)
+  const {
+    settings,
+    update,
+    toggleDark,
+    setTheme,
+    setFontSize,
+    resetSettings,
+  } = useSettings()
 
-  // Props shared with every page
+  // ── Props shared with every page ────────────────
   const sharedProps = {
     // auth
-    user:             auth.user,
-    isLoggedIn:       auth.isLoggedIn,
-    onLogin:          auth.login,
-    onContinueGuest:  auth.continueAsGuest,
-    onLogout:         auth.logout,
-    onUpdateProfile:  auth.updateProfile,
+    user:            auth.user,
+    isLoggedIn:      auth.isLoggedIn,
+
+    // ✅ Handles both login and signup
+    onLogin: async (email, password, name) => {
+      if (name) {
+        return await auth.signup(name, email, password)
+      } else {
+        return await auth.login(email, password)
+      }
+    },
+
+    onContinueGuest: auth.continueAsGuest,
+    onLogout:        auth.logout,
+    onUpdateProfile: auth.updateProfile,
+
     // settings
     settings,
     onUpdateSettings: update,
@@ -36,19 +51,21 @@ export default function App() {
     onSetTheme:       setTheme,
     onSetFontSize:    setFontSize,
     onResetSettings:  resetSettings,
-    // convenience aliases still used in some pages
+
+    // convenience alias
     dark: settings.dark,
   }
 
+  // ✅ THIS WAS MISSING — the return statement!
   return (
     <Routes>
-      <Route path="/"        element={<LandingPage  {...sharedProps} />} />
-      <Route path="/login"   element={<LoginPage    {...sharedProps} />} />
-      <Route path="/signup"  element={<SignupPage   {...sharedProps} />} />
-      <Route path="/chat"    element={<ChatPage     {...sharedProps} />} />
-      <Route path="/profile" element={<ProfilePage  {...sharedProps} />} />
-      <Route path="/settings"element={<SettingsPage {...sharedProps} />} />
-      <Route path="*"        element={<NotFoundPage />} />
+      <Route path="/"         element={<LandingPage  {...sharedProps} />} />
+      <Route path="/login"    element={<LoginPage    {...sharedProps} />} />
+      <Route path="/signup"   element={<SignupPage   {...sharedProps} />} />
+      <Route path="/chat"     element={<ChatPage     {...sharedProps} />} />
+      <Route path="/profile"  element={<ProfilePage  {...sharedProps} />} />
+      <Route path="/settings" element={<SettingsPage {...sharedProps} />} />
+      <Route path="*"         element={<NotFoundPage />} />
     </Routes>
   )
 }

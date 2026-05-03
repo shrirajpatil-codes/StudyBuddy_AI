@@ -1,72 +1,167 @@
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const User = require("../models/User");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
-// Generate JWT token
-const generateToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-    expiresIn: '7d'
-  });
-};
-
-// SIGNUP
-const signup = async (req, res) => {
+// ✅ REGISTER — POST /api/auth/register
+const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
+
+    // Validate fields
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        error: "Please provide name, email and password",
+      });
+    }
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'Email already registered' });
+      return res.status(400).json({
+        success: false,
+        error: "User already exists with this email",
+      });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user
+    // Create new user
+    // Password is auto-hashed by User model pre-save hook
     const user = await User.create({
       name,
       email,
-      password: hashedPassword
+      password: password,
     });
 
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    console.log(`✅ New user registered: ${email}`);
+
     res.status(201).json({
-      message: 'Signup successful',
-      token: generateToken(user._id),
-      user: { id: user._id, name: user.name, email: user.email }
+      success: true,
+      message: "Registration successful",
+      data: {
+        token,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+        },
+      },
     });
 
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error("❌ Register Error:", error.message);
+
+    // Handle duplicate email error from MongoDB
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        error: "Email already exists — please use a different email",
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: "Server error during registration",
+    });
   }
 };
 
-// LOGIN
-const login = async (req, res) => {
+// ✅ LOGIN — POST /api/auth/login
+const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user
+    // Validate fields
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        error: "Please provide email and password",
+      });
+    }
+
+    // Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: 'Invalid email or password' });
+      return res.status(401).json({
+        success: false,
+        error: "Invalid email or password",
+      });
     }
 
-    // Check password
-    const isMatch = await bcrypt.compare(password, user.password);
+    // Compare password using model method
+    const isMatch = await user.matchPassword(password);
     if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid email or password' });
+      return res.status(401).json({
+        success: false,
+        error: "Invalid email or password",
+      });
     }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    console.log(`✅ User logged in: ${email}`);
 
     res.status(200).json({
-      message: 'Login successful',
-      token: generateToken(user._id),
-      user: { id: user._id, name: user.name, email: user.email }
+      success: true,
+      message: "Login successful",
+      data: {
+        token,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+        },
+      },
     });
 
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error("❌ Login Error:", error.message);
+    res.status(500).json({
+      success: false,
+      error: "Server error during login",
+    });
   }
 };
 
-module.exports = { signup, login };
+// ✅ GET PROFILE — GET /api/auth/profile
+const getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+
+  } catch (error) {
+    console.error("❌ Profile Error:", error.message);
+    res.status(500).json({
+      success: false,
+      error: "Server error fetching profile",
+    });
+  }
+};
+
+module.exports = {
+  registerUser,
+  loginUser,
+  getProfile,
+};

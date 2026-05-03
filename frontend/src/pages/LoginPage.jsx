@@ -1,5 +1,4 @@
 // pages/LoginPage.jsx
-
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight } from 'lucide-react'
@@ -16,16 +15,32 @@ export default function LoginPage({ dark, onToggleDark, onLogin, onContinueGuest
   const [error, setError]       = useState('')
   const navigate = useNavigate()
 
+  // ✅ REAL login — calls backend API
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    if (!email || !password) { setError('Please fill in all fields.'); return }
-    if (password.length < 6)  { setError('Password must be at least 6 characters.'); return }
+
+    if (!email || !password) { 
+      setError('Please fill in all fields.')
+      return 
+    }
+    if (password.length < 6) { 
+      setError('Password must be at least 6 characters.')
+      return 
+    }
+
     setLoading(true)
-    await new Promise(r => setTimeout(r, 1000))
+
+    // Call real backend login
+    const result = await onLogin?.(email, password)
+
     setLoading(false)
-    onLogin?.(email)
-    navigate('/chat')
+
+    if (result?.success) {
+      navigate('/chat')
+    } else {
+      setError(result?.error || 'Login failed. Please check your credentials.')
+    }
   }
 
   const handleGuest = () => {
@@ -43,7 +58,6 @@ export default function LoginPage({ dark, onToggleDark, onLogin, onContinueGuest
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md animate-slide-up">
           <div className="rounded-3xl border border-theme p-8 shadow-xl" style={{ background: 'var(--bg-card)' }}>
-            {/* Header */}
             <div className="text-center mb-8">
               <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
                 style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 4px 20px rgba(99,102,241,0.35)' }}>
@@ -60,30 +74,16 @@ export default function LoginPage({ dark, onToggleDark, onLogin, onContinueGuest
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <Input
-                label="Email address"
-                type="email"
-                placeholder="you@college.edu"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                icon={<Mail size={16} />}
-                autoComplete="email"
-              />
+              <Input label="Email address" type="email" placeholder="you@college.edu"
+                value={email} onChange={e => setEmail(e.target.value)}
+                icon={<Mail size={16} />} autoComplete="email" />
               <div className="relative">
-                <Input
-                  label="Password"
-                  type={showPass ? 'text' : 'password'}
-                  placeholder="Enter your password"
-                  value={password}
+                <Input label="Password" type={showPass ? 'text' : 'password'}
+                  placeholder="Enter your password" value={password}
                   onChange={e => setPassword(e.target.value)}
-                  icon={<Lock size={16} />}
-                  autoComplete="current-password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPass(s => !s)}
-                  className="absolute right-3 top-[38px] text-muted hover:text-theme transition-colors cursor-pointer"
-                >
+                  icon={<Lock size={16} />} autoComplete="current-password" />
+                <button type="button" onClick={() => setShowPass(s => !s)}
+                  className="absolute right-3 top-[38px] text-muted hover:text-theme transition-colors cursor-pointer">
                   {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
