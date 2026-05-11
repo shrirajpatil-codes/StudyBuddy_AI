@@ -205,7 +205,6 @@ Open [http://localhost:5173](http://localhost:5173)
 | `JWT_SECRET` | Secret key for JWT tokens |
 | `FRONTEND_URL` | Frontend URL for CORS |
 
-> ⚠️ Never commit your `.env` file to GitHub
 
 ---
 
@@ -213,4 +212,3 @@ Open [http://localhost:5173](http://localhost:5173)
 
 Built with ❤️ by **Shriraj Patil**
 Powered by **Google Gemini AI** — Free tier
-7-8 days of hardcore full-stack development 🚀
