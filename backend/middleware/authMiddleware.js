@@ -1,89 +1,86 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
-require("dotenv").config();
+const jwt = require("jsonwebtoken")
+const User = require("../models/User")
+require("dotenv").config()
 
-// ✅ PROTECT MIDDLEWARE — verifies JWT token
 const protect = async (req, res, next) => {
   try {
-    let token;
+    let token
 
-    // Step 1 — Check if token exists in request headers
-    // Frontend must send: Authorization: Bearer <token>
+    // Step 1 — Check Authorization header
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
     ) {
-      // Extract token from "Bearer <token>"
-      token = req.headers.authorization.split(" ")[1];
+      token = req.headers.authorization.split(" ")[1]
     }
 
-    // Step 2 — If no token found, reject request
+    // Step 2 — No token found
     if (!token) {
       return res.status(401).json({
         success: false,
         error: "Access denied — no token provided",
-      });
+        code: "NO_TOKEN"
+      })
     }
 
-    // Step 3 — Verify the token is valid and not expired
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Step 3 — Verify token
+    let decoded
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET)
+    } catch (jwtError) {
+      // Token expired
+      if (jwtError.name === "TokenExpiredError") {
+        return res.status(401).json({
+          success: false,
+          error: "Token expired — please login again",
+          code: "TOKEN_EXPIRED"    // ← frontend uses this code
+        })
+      }
+      // Token invalid
+      if (jwtError.name === "JsonWebTokenError") {
+        return res.status(401).json({
+          success: false,
+          error: "Invalid token — please login again",
+          code: "INVALID_TOKEN"
+        })
+      }
+    }
 
-    // Step 4 — Find user from decoded token id
-    const user = await User.findById(decoded.id).select("-password");
-
-    // Step 5 — If user no longer exists in DB
+    // Step 4 — Find user
+    const user = await User.findById(decoded.id).select("-password")
     if (!user) {
       return res.status(401).json({
         success: false,
-        error: "Access denied — user no longer exists",
-      });
+        error: "User not found — please login again",
+        code: "USER_NOT_FOUND"
+      })
     }
 
-    // Step 6 — Attach user to request object
-    // Now any controller can access req.user
-    req.user = user;
-
-    console.log(`🔐 Auth verified for user: ${user.email}`);
-
-    // Step 7 — Move to next middleware or controller
-    next();
+    // Step 5 — Attach user to request
+    req.user = user
+    console.log(`🔐 Auth verified for user: ${user.email}`)
+    next()
 
   } catch (error) {
-    console.error("❌ Auth Middleware Error:", error.message);
-
-    // Handle specific JWT errors
-    if (error.name === "JsonWebTokenError") {
-      return res.status(401).json({
-        success: false,
-        error: "Invalid token — please login again",
-      });
-    }
-
-    if (error.name === "TokenExpiredError") {
-      return res.status(401).json({
-        success: false,
-        error: "Token expired — please login again",
-      });
-    }
-
+    console.error("❌ Auth Middleware Error:", error.message)
     res.status(500).json({
       success: false,
       error: "Server error in authentication",
-    });
+      code: "SERVER_ERROR"
+    })
   }
-};
+}
 
-// ✅ OPTIONAL — Admin only middleware
-// Use this if you want admin-only routes in future
 const adminOnly = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
-    next();
+    next()
   } else {
     res.status(403).json({
       success: false,
       error: "Access denied — admin only",
-    });
+      code: "ADMIN_ONLY"
+    })
   }
-};
+}
 
-module.exports = { protect, adminOnly };
+module.exports = { protect, adminOnly }
