@@ -10,6 +10,7 @@ import SignupPage   from './pages/SignupPage'
 import ProfilePage  from './pages/ProfilePage'
 import SettingsPage from './pages/SettingsPage'
 import NotFoundPage from './pages/NotFoundPage'
+import DocumentsPage from './pages/DocumentsPage'
 
 export default function App() {
   // ── Auth ────────────────────────────────────────
@@ -65,6 +66,7 @@ export default function App() {
       <Route path="/chat"     element={<ChatPage     {...sharedProps} />} />
       <Route path="/profile"  element={<ProfilePage  {...sharedProps} />} />
       <Route path="/settings" element={<SettingsPage {...sharedProps} />} />
+      <Route path="/documents" element={<DocumentsPage {...sharedProps} />} />
       <Route path="*"         element={<NotFoundPage />} />
     </Routes>
   )

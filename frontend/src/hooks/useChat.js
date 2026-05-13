@@ -1,8 +1,6 @@
 // hooks/useChat.js
-// Now uses real Gemini API through backend
-
 import { useState, useCallback, useRef } from 'react'
-import { sendMessage as sendMessageAPI } from '../api'
+import { sendMessage as sendMessageAPI, sendMessageWithContext } from '../api'
 import { nanoid } from '../utils/nanoid'
 
 export default function useChat() {
@@ -23,23 +21,23 @@ export default function useChat() {
   const activeSession = sessions.find(s => s.id === activeSessionId) || null
   const messages      = activeSession?.messages || []
 
-  // ── Persist ───────────────────────────────────────
+  // ── Persist to localStorage ───────────────────────
   const persist = (updated) => {
     setSessions(updated)
-    try { 
-      localStorage.setItem('sb-sessions', JSON.stringify(updated)) 
+    try {
+      localStorage.setItem('sb-sessions', JSON.stringify(updated))
     } catch {}
   }
 
   // ── Create new session ────────────────────────────
   const newSession = useCallback((mode = 'doubt') => {
     const id = nanoid()
-    const session = { 
-      id, 
-      title: 'New Chat', 
-      mode, 
-      messages: [], 
-      createdAt: Date.now() 
+    const session = {
+      id,
+      title:     'New Chat',
+      mode,
+      messages:  [],
+      createdAt: Date.now(),
     }
     const updated = [session, ...sessions]
     persist(updated)
@@ -61,8 +59,10 @@ export default function useChat() {
     }
   }, [sessions, activeSessionId])
 
-  // ── Send message — NOW CALLS REAL GEMINI API ──────
-  const sendMessage = useCallback(async (text, mode = 'doubt') => {
+  // ── Core message sender ───────────────────────────
+  // Shared logic between sendMessage and sendMessageWithDoc
+  // Handles: session creation, optimistic UI update, API call, error bubble
+  const _send = useCallback(async (text, mode = 'doubt', apiCall) => {
     if (!text.trim()) return
     setChatError('')
 
@@ -70,98 +70,83 @@ export default function useChat() {
     let sid = activeSessionId
     if (!sid) sid = newSession(mode)
 
-    const userMsg = { 
-      id:      nanoid(), 
-      role:    'user', 
-      content: text, 
-      ts:      Date.now() 
+    // Build user message object
+    const userMsg = {
+      id:      nanoid(),
+      role:    'user',
+      content: text,
+      ts:      Date.now(),
     }
 
-    // Add user message immediately to UI
+    // Add user message to UI immediately (optimistic update)
     setSessions(prev => {
       const updated = prev.map(s =>
         s.id === sid
-          ? { 
-              ...s, 
-              messages: [...s.messages, userMsg], 
-              title: s.title === 'New Chat' 
-                ? text.slice(0, 40) 
-                : s.title 
+          ? {
+              ...s,
+              messages: [...s.messages, userMsg],
+              title: s.title === 'New Chat' ? text.slice(0, 40) : s.title,
             }
           : s
       )
-      try { 
-        localStorage.setItem('sb-sessions', JSON.stringify(updated)) 
-      } catch {}
+      try { localStorage.setItem('sb-sessions', JSON.stringify(updated)) } catch {}
       return updated
     })
 
-    // Call real Gemini API through backend
     setIsLoading(true)
     abortRef.current = false
 
     try {
-      // Get user from localStorage for userId
-      const storedUser = localStorage.getItem('sb-user')
-      const userData   = storedUser ? JSON.parse(storedUser) : null
-      const userId     = userData?.id || 'guest'
-
-      // ✅ Real API call to backend → Gemini
-      const response = await sendMessageAPI({ 
-        message: text,
-        userId:  userId,
-      })
+      // apiCall is passed in by the caller — normal or document-aware
+      const response = await apiCall()
 
       if (abortRef.current) return
 
-      // Extract AI response from backend response
       const aiContent = response.data.data.aiResponse
 
-      const aiMsg = { 
-        id:      nanoid(), 
-        role:    'ai', 
-        content: aiContent, 
-        ts:      Date.now() 
+      // Check if response came from a document
+      const docTitle = response.data.data.documentTitle || null
+
+      const aiMsg = {
+        id:          nanoid(),
+        role:        'ai',
+        content:     aiContent,
+        ts:          Date.now(),
+        // Store document title on the message for display in ChatBubble
+        documentTitle: docTitle,
       }
 
-      // Add AI response to UI
       setSessions(prev => {
         const updated = prev.map(s =>
-          s.id === sid 
-            ? { ...s, messages: [...s.messages, aiMsg] } 
+          s.id === sid
+            ? { ...s, messages: [...s.messages, aiMsg] }
             : s
         )
-        try { 
-          localStorage.setItem('sb-sessions', JSON.stringify(updated)) 
-        } catch {}
+        try { localStorage.setItem('sb-sessions', JSON.stringify(updated)) } catch {}
         return updated
       })
 
     } catch (error) {
       console.error('❌ Chat API Error:', error)
 
-      // Show error message in chat
       const errMsg = error.response?.data?.error || 'Something went wrong. Try again.'
       setChatError(errMsg)
 
-      // Add error bubble to chat
-      const errorMsg = { 
-        id:      nanoid(), 
-        role:    'ai', 
-        content: `⚠️ Error: ${errMsg}`, 
+      const errorMsg = {
+        id:      nanoid(),
+        role:    'ai',
+        content: `⚠️ Error: ${errMsg}`,
         ts:      Date.now(),
         isError: true,
       }
 
       setSessions(prev => {
         const updated = prev.map(s =>
-          s.id === sid 
-            ? { ...s, messages: [...s.messages, errorMsg] } 
+          s.id === sid
+            ? { ...s, messages: [...s.messages, errorMsg] }
             : s
         )
-        try { 
-          localStorage.setItem('sb-sessions', JSON.stringify(updated)) 
-        } catch {}
+        try { localStorage.setItem('sb-sessions', JSON.stringify(updated)) } catch {}
         return updated
       })
 
@@ -170,37 +155,58 @@ export default function useChat() {
     }
   }, [activeSessionId, newSession])
 
+  // ── NORMAL SEND — no document context ─────────────
+  // Behaviour identical to before — nothing changed for existing chat
+  const sendMessage = useCallback((text, mode = 'doubt') => {
+    const storedUser = localStorage.getItem('sb-user')
+    const userData   = storedUser ? JSON.parse(storedUser) : null
+    const userId     = userData?.id || 'guest'
+
+    return _send(text, mode, () =>
+      sendMessageAPI({ message: text, userId })
+    )
+  }, [_send])
+
+  // ── DOCUMENT-AWARE SEND — with document context ───
+  // Called when a document is active in ChatPage
+  // documentId is passed to backend which injects document text into prompt
+  const sendMessageWithDoc = useCallback((text, mode = 'doubt', documentId) => {
+    return _send(text, mode, () =>
+      sendMessageWithContext(text, documentId)
+    )
+  }, [_send])
+
   // ── Change mode of current session ────────────────
   const changeMode = useCallback((mode) => {
     if (!activeSessionId) return
     setSessions(prev => {
-      const updated = prev.map(s => 
+      const updated = prev.map(s =>
         s.id === activeSessionId ? { ...s, mode } : s
       )
-      try { 
-        localStorage.setItem('sb-sessions', JSON.stringify(updated)) 
-      } catch {}
+      try { localStorage.setItem('sb-sessions', JSON.stringify(updated)) } catch {}
       return updated
     })
   }, [activeSessionId])
 
-  const stopGeneration = () => { 
+  // ── Stop generation ───────────────────────────────
+  const stopGeneration = () => {
     abortRef.current = true
-    setIsLoading(false) 
+    setIsLoading(false)
   }
 
   return {
-    sessions, 
-    activeSession, 
-    messages, 
+    sessions,
+    activeSession,
+    messages,
     isLoading,
     chatError,
-    newSession, 
-    selectSession, 
-    deleteSession,
-    sendMessage, 
-    changeMode, 
-    stopGeneration,
     activeSessionId,
+    newSession,
+    selectSession,
+    deleteSession,
+    sendMessage,
+    sendMessageWithDoc,   // ← NEW
+    changeMode,
+    stopGeneration,
   }
 }

@@ -22,6 +22,7 @@ const { testGeminiConnection } = require("./config/gemini");
 // ============================================
 const authRoutes = require("./routes/auth");
 const chatRoutes = require("./routes/chat");
+const documentRoutes  = require("./routes/documents");
 
 // ============================================
 // STEP 5 — Initialize Express App
@@ -48,7 +49,8 @@ app.use(
 
 // Parse incoming JSON requests
 // Required to read req.body in controllers
-app.use(express.json());
+app.use(express.json({limit: '100mb'})); // Increase limit for large PDF uploads
+app.use(express.urlencoded({extended: true, limit: '100mb'}));
 
 // Parse URL encoded data (form submissions)
 app.use(express.urlencoded({ extended: true }));
@@ -91,6 +93,9 @@ app.use("/api/auth", authRoutes);
 
 // Chat routes — /api/chat, /api/chat/history, /api/chat/verify
 app.use("/api/chat", chatRoutes);
+
+// Document routes — /api/documents/upload, /api/documents, /api/documents/:id, etc.
+app.use("/api/documents", documentRoutes);
 
 // ============================================
 // STEP 10 — Handle Unknown Routes (404)
