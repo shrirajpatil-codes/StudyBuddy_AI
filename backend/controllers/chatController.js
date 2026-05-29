@@ -114,6 +114,66 @@ Remember: This student might be sitting alone at night, stressed about
 their exam tomorrow, with no one to ask. Be the guidance they deserve.
 `;
 
+
+// ============================================
+// HELPER — Build prompt for 1-Day Exam Blast mode
+// ============================================
+const buildExamBlastPrompt = (message) => `
+You are StudyBuddy AI in ONE-DAY-BEFORE-EXAM MODE.
+
+The student has an exam TOMORROW. They are stressed and short on time.
+Your ONLY job is to give them the most exam-focused, high-value content possible.
+No fluff. No long theory. Only what actually helps them pass tomorrow.
+
+════════════════════════════════════════
+STUDENT SITUATION:
+════════════════════════════════════════
+- Exam is TOMORROW
+- Limited time to study
+- Needs maximum output from minimum input
+- Stressed and needs confidence + clarity
+
+════════════════════════════════════════
+YOUR RESPONSE MUST ALWAYS INCLUDE:
+════════════════════════════════════════
+
+🎯 Top 10 Most Important Topics:
+[List the highest-priority topics for this subject — exam setters love these]
+
+⚡ 80/20 Concepts (Must Know):
+[The 20% of concepts that appear in 80% of exams — explain each in 2-3 lines]
+
+📝 Fast Revision Notes:
+[Ultra-short bullet notes for each key topic — enough to recall in exam]
+
+❓ Expected Exam Questions:
+[5-7 most likely questions with one-line answers]
+
+🎤 Viva Questions to Prepare:
+[5 common viva questions with short crisp answers]
+
+🗺️ Study Roadmap for Tonight:
+[Hour-by-hour plan — what to study first, second, third]
+
+⚠️ Common Mistakes to Avoid:
+[Top mistakes students make in this subject's exam]
+
+✅ Last Minute Tips:
+[3-4 quick tips to maximize marks tomorrow]
+
+════════════════════════════════════════
+STRICT RULES:
+════════════════════════════════════════
+- Be CONCISE — no long paragraphs
+- Prioritize ruthlessly — only exam-relevant content
+- Use bullet points and short sentences
+- Make every line count
+- Sound like a senior student who just gave this exam and is sharing gold
+
+Subject the student needs help with: ${message}
+════════════════════════════════════════
+`;
+
 // ============================================
 // HELPER — Build prompt WITH document context
 // Used when user is chatting about a specific document
@@ -209,6 +269,9 @@ const sendMessage = async (req, res) => {
 
       console.log("📄 Using document context:", document.title);
 
+    }else if (req.body.mode === 'exam_blast') {
+      prompt = buildExamBlastPrompt(message);
+      console.log("🔥 Using Exam Blast prompt");
     } else {
       // Normal study chat mode — original behaviour
       prompt = buildStudyPrompt(message);

@@ -2,18 +2,20 @@
 // Pill-style mode switcher: Doubt | Exam Prep | Viva Practice
 
 import React from 'react'
-import { HelpCircle, BookOpen, Mic } from 'lucide-react'
+import { HelpCircle, BookOpen, Mic, Zap } from 'lucide-react'
 
 export const MODES = [
   { id: 'doubt', label: 'Doubt',     icon: HelpCircle, color: 'brand',  desc: 'Get instant answers to your academic questions' },
   { id: 'exam',  label: 'Exam Prep', icon: BookOpen,   color: 'violet', desc: 'Summarise topics, revision notes, practice Qs' },
   { id: 'viva',  label: 'Viva',      icon: Mic,        color: 'green',  desc: 'Simulate oral exams with model answers' },
+  { id: 'exam_blast', label: '1-Day Exam', icon: Zap, color: 'orange', desc: 'Exam is tomorrow - get only what matters most'},
 ]
 
 const colorMap = {
   brand:  { active: 'bg-brand-500 text-white shadow-glow-sm', dot: 'bg-brand-400' },
   violet: { active: 'bg-violet-500 text-white',                dot: 'bg-violet-400' },
   green:  { active: 'bg-green-500 text-white',                 dot: 'bg-green-400' },
+  orange: {active: 'bg-orange-500 text-white',                  dot: 'bg-orange-400'},
 }
 
 export default function ModeSelector({ value, onChange, compact = false }) {

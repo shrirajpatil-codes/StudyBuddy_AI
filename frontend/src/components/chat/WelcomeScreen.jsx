@@ -4,6 +4,13 @@
 import React from 'react'
 import { BookOpen, HelpCircle, Mic, Zap, Target, Clock } from 'lucide-react'
 
+const EXAM_BLAST_SUGGESTIONS = [
+  { icon: Zap, text: "Operating Systems — exam is tomorrow!" },
+  { icon: Zap, text: "DBMS — need everything important fast" },
+  { icon: Zap, text: "Computer Networks — last minute revision" },
+  { icon: Zap, text: "Data Structures — quick exam prep" },
+]
+
 const SUGGESTIONS = {
   doubt: [
     { icon: HelpCircle, text: "Explain Thevenin's theorem with an example" },
@@ -29,11 +36,12 @@ const MODE_INFO = {
   doubt: { title: 'Clear Your Doubts', subtitle: 'Ask any engineering concept and get instant, clear explanations.', color: '#6366f1' },
   exam:  { title: 'Ace Your Exams',   subtitle: 'Get revision notes, important questions, and practice tests.', color: '#8b5cf6' },
   viva:  { title: 'Nail Your Viva',   subtitle: 'Simulate oral exams with model answers and confidence tips.', color: '#10b981' },
+  exam_blast: { title: '🔥 Exam is Tomorrow!', subtitle: 'Tell me your subject — I\'ll give you only what matters most.',    color: '#f97316' },
 }
 
 export default function WelcomeScreen({ mode = 'doubt', onSuggestion }) {
-  const info    = MODE_INFO[mode]
-  const prompts = SUGGESTIONS[mode]
+  const info    = MODE_INFO[mode]    || MODE_INFO['doubt']
+  const prompts = mode === 'exam_blast' ? EXAM_BLAST_SUGGESTIONS : (SUGGESTIONS[mode] || SUGGESTIONS['doubt'])
 
   return (
     <div className="flex flex-col items-center justify-center h-full px-6 py-12 animate-fade-in">
@@ -49,9 +57,10 @@ export default function WelcomeScreen({ mode = 'doubt', onSuggestion }) {
           className="w-12 h-12 rounded-xl flex items-center justify-center"
           style={{ background: `linear-gradient(135deg, ${info.color}, ${info.color}cc)` }}
         >
-          {mode === 'doubt' && <HelpCircle size={24} color="white" />}
-          {mode === 'exam'  && <BookOpen   size={24} color="white" />}
-          {mode === 'viva'  && <Mic        size={24} color="white" />}
+          {mode === 'doubt'      && <HelpCircle size={24} color="white" />}
+          {mode === 'exam'       && <BookOpen   size={24} color="white" />}
+          {mode === 'viva'       && <Mic        size={24} color="white" />}
+          {mode === 'exam_blast' && <Zap        size={24} color="white" />}
         </div>
       </div>
 

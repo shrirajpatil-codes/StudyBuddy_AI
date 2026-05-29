@@ -125,6 +125,7 @@ const PLACEHOLDERS = {
   doubt: 'Ask a doubt… e.g. "Explain Kirchhoff\'s laws"',
   exam:  'What topic to revise? e.g. "DBMS important questions"',
   viva:  'Practice viva… e.g. "Ask me about Computer Networks"',
+  exam_blast: 'Exam tomorrow! eg. "Operating Systems" or "DBMS"',
 }
 
 // ============================================
@@ -207,6 +208,10 @@ export default function ChatPage({ dark, onToggleDark, isLoggedIn, user, onLogou
   }, [doc])
 
   const currentModeInfo = MODES.find(m => m.id === mode)
+
+  const MODE_HINTS = {
+    exam_blast: '⚡ Tell me your subject — I\'ll give you only what matters for tomorrow\'s exam.',
+  }
 
   // Placeholder updates when document is active
   const placeholder = activeDoc
@@ -309,9 +314,9 @@ export default function ChatPage({ dark, onToggleDark, isLoggedIn, user, onLogou
             {/* Mode hint — only shown when no document is active */}
             {!activeDoc && currentModeInfo && (
               <div className="flex items-center gap-1.5 mb-2">
-                <currentModeInfo.icon size={12} className="text-muted" />
-                <span className="text-xs text-muted">
-                  {currentModeInfo.desc}
+                <currentModeInfo.icon size={12} className={mode === 'exam_blast' ? 'text-orange-400' : 'text-muted'} />
+                <span className={`text-xs font-medium ${mode === 'exam_blast' ? 'text-orange-400' : 'text-muted'}`}>
+                  {MODE_HINTS[mode] || currentModeInfo.desc}
                 </span>
               </div>
             )}
