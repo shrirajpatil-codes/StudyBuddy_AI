@@ -67,7 +67,7 @@ export default function Sidebar({
       {!collapsed && (
         <div className="px-3 pb-3 border-b border-theme">
           <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Mode</p>
-          <ModeSelector value={currentMode} onChange={onModeChange} compact />
+          <ModeSelector value={currentMode} onChange={onModeChange} />
         </div>
       )}
 

@@ -163,7 +163,7 @@ export default function useChat() {
     const userId     = userData?.id || 'guest'
 
     return _send(text, mode, () =>
-      sendMessageAPI({ message: text, userId })
+      sendMessageAPI({ message: text, userId, mode })
     )
   }, [_send])
 

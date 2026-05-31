@@ -21,7 +21,10 @@ const colorMap = {
 export default function ModeSelector({ value, onChange, compact = false }) {
   if (compact) {
     return (
-      <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'var(--bg-primary)' }}>
+      <div
+        className="flex gap-1 p-1 rounded-xl overflow-x-auto max-w-[420px] scrollbar-hide"
+        style={{ background: 'var(--bg-primary)' }}
+      >
         {MODES.map(m => {
           const Icon   = m.icon
           const active = value === m.id
@@ -31,8 +34,8 @@ export default function ModeSelector({ value, onChange, compact = false }) {
               onClick={() => onChange(m.id)}
               title={m.desc}
               className={`
-                flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-                transition-all duration-200 cursor-pointer
+                flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold
+                transition-all duration-200 cursor-pointer whitespace-nowrap flex-shrink-0
                 ${active ? colorMap[m.color].active : 'text-muted hover:text-theme'}
               `}
             >
@@ -46,7 +49,7 @@ export default function ModeSelector({ value, onChange, compact = false }) {
   }
 
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-2 gap-2">
       {MODES.map(m => {
         const Icon   = m.icon
         const active = value === m.id
