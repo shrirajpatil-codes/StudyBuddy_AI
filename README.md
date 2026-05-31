@@ -19,7 +19,9 @@
 | 🤖 **Real Gemini AI** | Powered by Google Gemini 2.5 Flash — real AI responses |
 | 🔐 **Authentication** | Secure JWT-based login and signup system |
 | 💬 **Chat Interface** | ChatGPT-style chat with clean response formatting |
-| 🎯 **3 Study Modes** | Doubt Clearing · Exam Prep · Viva Practice |
+| 🎯 **4 Study Modes** | Doubt Clearing · Exam Prep · Viva Practice · 🔥 1-Day Exam Mode |
+| 🔥 **1-Day Exam Mode** | Last-minute exam prep — important topics, 80/20 concepts, expected questions, viva Qs, study roadmap |
+| 📄 **Document Intelligence** | Upload PDF notes or question sets — AI reads and answers based on your document |
 | 💾 **Chat History** | Every conversation saved to MongoDB |
 | 🌙 **Dark Mode** | Smooth toggle, persisted in localStorage |
 | 📱 **Responsive** | Works on mobile, tablet, and desktop |
@@ -34,39 +36,74 @@ StudyBuddy_AI/
 │
 ├── backend/
 │   ├── config/
-│   │   ├── db.js
-│   │   └── gemini.js
+│   │   ├── db.js                  — MongoDB connection setup
+│   │   └── gemini.js              — Google Gemini AI initialization
 │   ├── controllers/
-│   │   ├── authController.js
-│   │   └── chatController.js
+│   │   ├── authController.js      — Register, login, profile logic
+│   │   ├── chatController.js      — AI chat + exam blast + document-aware chat
+│   │   └── documentController.js  — PDF upload, text extraction, document management
 │   ├── middleware/
-│   │   └── authMiddleware.js
+│   │   ├── authMiddleware.js      — JWT token verification
+│   │   └── uploadMiddleware.js    — Multer file upload handler
 │   ├── models/
-│   │   ├── Chat.js
-│   │   └── User.js
+│   │   ├── Chat.js                — Chat message schema
+│   │   ├── Document.js            — Uploaded document schema
+│   │   └── User.js                — User account schema
 │   ├── routes/
-│   │   ├── auth.js
-│   │   └── chat.js
+│   │   ├── auth.js                — Auth routes
+│   │   ├── chat.js                — Chat routes
+│   │   └── documents.js           — Document routes
 │   ├── tests/
 │   │   └── testOpenAI.js
+│   ├── uploads/                   — Temporary PDF upload storage
 │   ├── .env.example
 │   ├── .gitignore
 │   ├── package.json
 │   ├── package-lock.json
-│   └── server.js
+│   └── server.js                  — Express app entry point
 │
 ├── frontend/
 │   ├── public/
 │   │   └── favicon.svg
 │   ├── src/
 │   │   ├── components/
+│   │   │   ├── chat/
+│   │   │   │   ├── AIAvatar.jsx         — AI profile icon in chat
+│   │   │   │   ├── ChatBubble.jsx       — Individual message bubble
+│   │   │   │   ├── ChatInput.jsx        — Message input with PDF upload support
+│   │   │   │   ├── TypingIndicator.jsx  — Animated loading dots
+│   │   │   │   └── WelcomeScreen.jsx    — Mode-specific welcome UI
+│   │   │   ├── layout/
+│   │   │   │   ├── Navbar.jsx           — Top navigation bar
+│   │   │   │   └── Sidebar.jsx          — Chat history + mode selector sidebar
+│   │   │   └── ui/
+│   │   │       ├── Badge.jsx            — Reusable badge component
+│   │   │       ├── Button.jsx           — Reusable button component
+│   │   │       ├── DarkModeToggle.jsx   — Dark/light mode switch
+│   │   │       ├── Input.jsx            — Reusable input component
+│   │   │       ├── Logo.jsx             — StudyBuddy logo
+│   │   │       └── ModeSelector.jsx     — 4-mode study mode switcher
 │   │   ├── hooks/
+│   │   │   ├── useAuth.js          — Login, signup, guest, logout logic
+│   │   │   ├── useChat.js          — Chat sessions, send message, history
+│   │   │   ├── useDocument.js      — PDF upload, document state management
+│   │   │   └── useSettings.js      — Dark mode, theme, font size settings
 │   │   ├── pages/
+│   │   │   ├── ChatPage.jsx        — Main chat dashboard with all 4 modes
+│   │   │   ├── DocumentsPage.jsx   — Document management page
+│   │   │   ├── LandingPage.jsx     — Home/marketing page
+│   │   │   ├── LoginPage.jsx       — Login form
+│   │   │   ├── NotFoundPage.jsx    — 404 page
+│   │   │   ├── ProfilePage.jsx     — User profile page
+│   │   │   ├── SettingsPage.jsx    — App settings page
+│   │   │   └── SignupPage.jsx      — Signup form
 │   │   ├── utils/
-│   │   ├── api.js
-│   │   ├── App.jsx
-│   │   ├── index.css
-│   │   └── main.jsx
+│   │   │   ├── formatTime.js       — Date/time formatting helpers
+│   │   │   └── nanoid.js           — Unique ID generator
+│   │   ├── api.js                  — All Axios API call functions
+│   │   ├── App.jsx                 — Root component with all routes
+│   │   ├── index.css               — Global styles + Tailwind base
+│   │   └── main.jsx                — React app entry point
 │   ├── .gitignore
 │   ├── index.html
 │   ├── package.json
@@ -115,7 +152,7 @@ NODE_ENV=development
 MONGO_URI=your_mongodb_connection_string
 GEMINI_API_KEY=your_gemini_api_key
 JWT_SECRET=your_jwt_secret_key
-FRONTEND_URL=http://localhost:3000
+FRONTEND_URL=http://localhost:5173
 ```
 
 Start backend:
@@ -145,6 +182,28 @@ Open [http://localhost:5173](http://localhost:5173)
 
 ---
 
+## 🎯 Study Modes
+
+| Mode | Description |
+|------|-------------|
+| 💬 **Doubt** | Ask any engineering concept — get instant clear explanations |
+| 📖 **Exam Prep** | Revision notes, important questions, practice tests |
+| 🎤 **Viva** | Simulate oral exams with model answers |
+| 🔥 **1-Day Exam** | Exam tomorrow? Get only what matters — top topics, 80/20 concepts, expected questions, viva Qs, and a study roadmap |
+
+---
+
+## 📄 Document Intelligence
+
+Upload any PDF — notes, question sets, previous papers — and chat with it directly.
+
+- Supports PDFs up to 100MB
+- AI reads and understands your document
+- Ask questions based on your own study material
+- Works alongside all 4 study modes
+
+---
+
 ## 🔌 API Endpoints
 
 ### Auth Routes
@@ -153,13 +212,23 @@ Open [http://localhost:5173](http://localhost:5173)
 | POST | `/api/auth/register` | ❌ | Register new user |
 | POST | `/api/auth/login` | ❌ | Login and get token |
 | GET | `/api/auth/profile` | ✅ | Get user profile |
+| PUT | `/api/auth/profile` | ✅ | Update user profile |
 
 ### Chat Routes
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| POST | `/api/chat` | ✅ | Send message to Gemini |
+| POST | `/api/chat` | ✅ | Send message to Gemini (supports all 4 modes) |
 | GET | `/api/chat/history` | ✅ | Get chat history |
 | DELETE | `/api/chat/:id` | ✅ | Delete a chat |
+| GET | `/api/chat/verify` | ✅ | Verify DB connection |
+
+### Document Routes
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/documents/upload` | ✅ | Upload a PDF document |
+| GET | `/api/documents` | ✅ | Get all uploaded documents |
+| GET | `/api/documents/:id` | ✅ | Get a single document |
+| DELETE | `/api/documents/:id` | ✅ | Delete a document |
 
 ---
 
@@ -170,7 +239,8 @@ Open [http://localhost:5173](http://localhost:5173)
 | `/` | Landing page |
 | `/login` | Login |
 | `/signup` | Sign up |
-| `/chat` | Chat dashboard |
+| `/chat` | Chat dashboard (all 4 modes) |
+| `/documents` | Document Intelligence page |
 | `/profile` | User profile |
 | `/settings` | App settings |
 
@@ -191,6 +261,7 @@ Open [http://localhost:5173](http://localhost:5173)
 - **MongoDB + Mongoose** — Database
 - **Google Gemini 2.5 Flash** — AI Engine
 - **JWT + bcryptjs** — Authentication
+- **Multer** — PDF file upload handling
 
 ---
 
@@ -204,7 +275,6 @@ Open [http://localhost:5173](http://localhost:5173)
 | `GEMINI_API_KEY` | Google Gemini API key |
 | `JWT_SECRET` | Secret key for JWT tokens |
 | `FRONTEND_URL` | Frontend URL for CORS |
-
 
 ---
 
