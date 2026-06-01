@@ -4,55 +4,128 @@
 @tailwind components;
 @tailwind utilities;
 
-
-/* ─── CSS Variables ─────────────────────────────── */
+/* ─── CSS Variables — Default (Doubt / Indigo) ──── */
 :root {
-  --bg-primary:   #f8f9ff;
-  --bg-secondary: #ffffff;
-  --bg-card:      #ffffff;
-  --bg-sidebar:   #f1f3fe;
-  --border:       #e2e5f1;
-  --text-primary: #0f1117;
-  --text-muted:   #6b7280;
-  --brand:         #6366f1;
-  --brand-primary: #6366f1;
-  --brand-secondary:#8b5cf6;
-  --brand-light:  #e0e7ff;
-  --violet:       #8b5cf6;
+  --bg-primary:      #f8f9ff;
+  --bg-secondary:    #ffffff;
+  --bg-card:         #ffffff;
+  --bg-sidebar:      #f1f3fe;
+  --border:          #e2e5f1;
+  --text-primary:    #0f1117;
+  --text-muted:      #6b7280;
+  --brand:           #6366f1;
+  --brand-primary:   #6366f1;
+  --brand-secondary: #8b5cf6;
+  --brand-light:     #e0e7ff;
   --scrollbar-thumb: #c7d2fe;
+
+  /* mesh orb colors */
+  --orb-1: rgba(99,102,241,0.10);
+  --orb-2: rgba(139,92,246,0.08);
 }
 
+/* ─── Mode: Exam Prep (Violet/Purple) ───────────── */
+[data-mode="exam"] {
+  --brand:           #8b5cf6;
+  --brand-primary:   #8b5cf6;
+  --brand-secondary: #7c3aed;
+  --brand-light:     #ede9fe;
+  --bg-primary:      #faf8ff;
+  --bg-sidebar:      #f3f0fe;
+  --border:          #e4dcfd;
+  --scrollbar-thumb: #c4b5fd;
+  --orb-1: rgba(139,92,246,0.10);
+  --orb-2: rgba(124,58,237,0.08);
+}
+
+/* ─── Mode: Viva (Emerald/Green) ────────────────── */
+[data-mode="viva"] {
+  --brand:           #10b981;
+  --brand-primary:   #10b981;
+  --brand-secondary: #059669;
+  --brand-light:     #d1fae5;
+  --bg-primary:      #f6fefa;
+  --bg-sidebar:      #ecfdf5;
+  --border:          #d1fae5;
+  --scrollbar-thumb: #6ee7b7;
+  --orb-1: rgba(16,185,129,0.10);
+  --orb-2: rgba(5,150,105,0.08);
+}
+
+/* ─── Mode: 1-Day Exam (Orange/Red) ─────────────── */
+[data-mode="exam_blast"] {
+  --brand:           #f97316;
+  --brand-primary:   #f97316;
+  --brand-secondary: #ef4444;
+  --brand-light:     #ffedd5;
+  --bg-primary:      #fffaf6;
+  --bg-sidebar:      #fff7ed;
+  --border:          #fed7aa;
+  --scrollbar-thumb: #fdba74;
+  --orb-1: rgba(249,115,22,0.10);
+  --orb-2: rgba(239,68,68,0.08);
+}
+
+/* ─── Dark mode base ────────────────────────────── */
 .dark {
-  --bg-primary:   #0d0f1a;
-  --bg-secondary: #111827;
-  --bg-card:      #161b2e;
-  --bg-sidebar:   #0d0f1a;
-  --border:       #1e2540;
-  --text-primary: #f1f5f9;
-  --text-muted:   #94a3b8;
-  --brand:        #818cf8;
-  --brand-light:  #1e1b4b;
-  --violet:       #a78bfa;
+  --bg-primary:      #0d0f1a;
+  --bg-secondary:    #111827;
+  --bg-card:         #161b2e;
+  --bg-sidebar:      #0d0f1a;
+  --border:          #1e2540;
+  --text-primary:    #f1f5f9;
+  --text-muted:      #94a3b8;
+  --brand:           #818cf8;
+  --brand-light:     #1e1b4b;
   --scrollbar-thumb: #374151;
+  --orb-1: rgba(99,102,241,0.18);
+  --orb-2: rgba(139,92,246,0.14);
+}
+
+/* ─── Dark + Mode overrides ─────────────────────── */
+.dark[data-mode="exam"] {
+  --brand:        #a78bfa;
+  --brand-light:  #2e1b6e;
+  --bg-sidebar:   #130f1f;
+  --border:       #2d1f5e;
+  --orb-1: rgba(139,92,246,0.20);
+  --orb-2: rgba(124,58,237,0.15);
+}
+
+.dark[data-mode="viva"] {
+  --brand:        #34d399;
+  --brand-light:  #064e3b;
+  --bg-sidebar:   #0a1f18;
+  --border:       #065f46;
+  --orb-1: rgba(16,185,129,0.20);
+  --orb-2: rgba(5,150,105,0.15);
+}
+
+.dark[data-mode="exam_blast"] {
+  --brand:        #fb923c;
+  --brand-light:  #431407;
+  --bg-sidebar:   #1c0f06;
+  --border:       #7c2d12;
+  --orb-1: rgba(249,115,22,0.20);
+  --orb-2: rgba(239,68,68,0.15);
 }
 
 /* ─── Base ──────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
-
 html { scroll-behavior: smooth; }
 
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   font-family: 'Outfit', sans-serif;
-  transition: background-color 0.25s, color 0.25s;
+  transition: background-color 0.35s ease, color 0.25s ease;
   -webkit-font-smoothing: antialiased;
 }
 
 /* ─── Custom Scrollbar ──────────────────────────── */
-::-webkit-scrollbar        { width: 6px; height: 6px; }
-::-webkit-scrollbar-track  { background: transparent; }
-::-webkit-scrollbar-thumb  { background: var(--scrollbar-thumb); border-radius: 99px; }
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--brand); }
 
 /* ─── Utility Classes ───────────────────────────── */
@@ -68,16 +141,10 @@ body {
 .mesh-bg {
   background-color: var(--bg-primary);
   background-image:
-    radial-gradient(at 20% 20%, rgba(99,102,241,0.12) 0px, transparent 50%),
-    radial-gradient(at 80% 80%, rgba(139,92,246,0.10) 0px, transparent 50%),
-    radial-gradient(at 50% 50%, rgba(99,102,241,0.05) 0px, transparent 50%);
-}
-
-.dark .mesh-bg {
-  background-image:
-    radial-gradient(at 20% 20%, rgba(99,102,241,0.18) 0px, transparent 50%),
-    radial-gradient(at 80% 80%, rgba(139,92,246,0.14) 0px, transparent 50%),
-    radial-gradient(at 50% 50%, rgba(99,102,241,0.08) 0px, transparent 50%);
+    radial-gradient(at 20% 20%, var(--orb-1) 0px, transparent 55%),
+    radial-gradient(at 80% 80%, var(--orb-2) 0px, transparent 55%),
+    radial-gradient(at 50% 10%, var(--orb-1) 0px, transparent 40%);
+  transition: background-color 0.35s ease, background-image 0.35s ease;
 }
 
 /* ─── Shimmer Skeleton ──────────────────────────── */
@@ -92,29 +159,6 @@ body {
   animation: shimmer 1.8s linear infinite;
 }
 
-/* ─── Chat Bubble Tail ───────────────────────────── */
-.bubble-user::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  right: -6px;
-  width: 12px; height: 12px;
-  background: inherit;
-  clip-path: polygon(0 0, 0% 100%, 100% 100%);
-  border-radius: 0 0 4px 0;
-}
-
-.bubble-ai::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: -6px;
-  width: 12px; height: 12px;
-  background: inherit;
-  clip-path: polygon(100% 0, 0% 100%, 100% 100%);
-  border-radius: 0 0 0 4px;
-}
-
 /* ─── Focus Ring ─────────────────────────────────── */
 .focus-ring:focus-visible {
   outline: 2px solid var(--brand);
@@ -122,17 +166,23 @@ body {
 }
 
 /* ─── Prose (AI responses) ───────────────────────── */
-.prose-chat p              { margin-bottom: 0.6rem; line-height: 1.75; }
-.prose-chat h1             { font-size: 1.15rem; font-weight: 800; margin: 1.25rem 0 0.5rem; color: var(--text-primary); }
-.prose-chat h2             { font-size: 1rem; font-weight: 700; margin: 1.1rem 0 0.4rem; color: var(--text-primary); padding-bottom: 0.3rem; border-bottom: 1px solid var(--border); }
-.prose-chat h3             { font-size: 0.9rem; font-weight: 700; margin: 0.9rem 0 0.3rem; color: var(--text-primary); }
-.prose-chat ul             { list-style: disc; padding-left: 1.4rem; margin: 0.4rem 0 0.75rem; }
-.prose-chat ol             { list-style: decimal; padding-left: 1.4rem; margin: 0.4rem 0 0.75rem; }
-.prose-chat li             { margin-bottom: 0.3rem; line-height: 1.7; }
-.prose-chat strong         { font-weight: 700; color: var(--text-primary); }
-.prose-chat em             { font-style: italic; color: var(--text-muted); }
-.prose-chat hr             { border-color: var(--border); margin: 0.85rem 0; }
-.prose-chat blockquote     { border-left: 3px solid var(--brand); padding-left: 0.85rem; margin: 0.5rem 0; font-style: italic; color: var(--text-muted); }
+.prose-chat p          { margin-bottom: 0.6rem; line-height: 1.75; }
+.prose-chat h1         { font-size: 1.15rem; font-weight: 800; margin: 1.25rem 0 0.5rem; color: var(--text-primary); }
+.prose-chat h2         { font-size: 1rem; font-weight: 700; margin: 1.1rem 0 0.4rem; color: var(--text-primary); padding-bottom: 0.3rem; border-bottom: 1px solid var(--border); }
+.prose-chat h3         { font-size: 0.9rem; font-weight: 700; margin: 0.9rem 0 0.3rem; color: var(--text-primary); }
+.prose-chat ul         { list-style: disc; padding-left: 1.4rem; margin: 0.4rem 0 0.75rem; }
+.prose-chat ol         { list-style: decimal; padding-left: 1.4rem; margin: 0.4rem 0 0.75rem; }
+.prose-chat li         { margin-bottom: 0.3rem; line-height: 1.7; }
+.prose-chat strong     { font-weight: 700; color: var(--text-primary); }
+.prose-chat em         { font-style: italic; color: var(--text-muted); }
+.prose-chat hr         { border-color: var(--border); margin: 0.85rem 0; }
+.prose-chat blockquote {
+  border-left: 3px solid var(--brand);
+  padding-left: 0.85rem;
+  margin: 0.5rem 0;
+  font-style: italic;
+  color: var(--text-muted);
+}
 .prose-chat code {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.8em;
@@ -159,7 +209,7 @@ body {
 
 @keyframes bounceDot {
   0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-  40%           { transform: scale(1.0); opacity: 1;   }
+  40%           { transform: scale(1.0); opacity: 1; }
 }
 
 /* ─── Scrollbar hide ────────────────────────────── */
@@ -167,11 +217,23 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
+.scrollbar-hide::-webkit-scrollbar { display: none; }
 
+/* ─── Cursor blink ───────────────────────────────── */
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0; }
+}
+
+/* ─── Mode transition — smooth color shifts ──────── */
+*, *::before, *::after {
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.15s ease;
+}
+
+/* Prevent transition on elements that shouldn't animate */
+textarea, input, pre, code {
+  transition: none;
 }

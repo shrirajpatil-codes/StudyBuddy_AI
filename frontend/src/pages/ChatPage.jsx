@@ -68,7 +68,6 @@ function UserMenu({ user, onLogout }) {
             border-theme shadow-xl z-50 overflow-hidden animate-slide-up"
           style={{ background: 'var(--bg-card)' }}
         >
-          {/* User info */}
           <div className="px-4 py-3 border-b border-theme">
             <p className="text-sm font-semibold text-theme truncate">
               {user?.isGuest ? 'Guest User' : (user?.name || 'Student')}
@@ -78,7 +77,6 @@ function UserMenu({ user, onLogout }) {
             </p>
           </div>
 
-          {/* Nav items */}
           <div className="py-1.5">
             <button
               onClick={() => { setOpen(false); navigate('/documents') }}
@@ -100,7 +98,6 @@ function UserMenu({ user, onLogout }) {
             </button>
           </div>
 
-          {/* Logout */}
           <div className="border-t border-theme py-1.5">
             <button
               onClick={handleLogout}
@@ -138,15 +135,19 @@ export default function ChatPage({ dark, onToggleDark, isLoggedIn, user, onLogou
   const [mode, setMode]                    = useState('doubt')
   const [sidebarCollapsed, setCollapse]    = useState(false)
   const [mobileSidebarOpen, setMobileOpen] = useState(false)
-
-  // Active document — null = normal chat, object = document-aware chat
   const [activeDoc, setActiveDoc]          = useState(null)
 
-  const bottomRef      = useRef(null)
+  const bottomRef       = useRef(null)
   const prevMsgCountRef = useRef(0)
 
-  // ── Auto-scroll only when a NEW message is added ──
-  // Does NOT fire on session switch (prevents scroll lock)
+  // ── Sync data-mode on <html> for CSS theming ──────
+  // This drives ALL mode-based color changes via CSS variables
+  useEffect(() => {
+    document.documentElement.setAttribute('data-mode', mode)
+    return () => document.documentElement.setAttribute('data-mode', 'doubt')
+  }, [mode])
+
+  // ── Auto-scroll only on new messages ─────────────
   useEffect(() => {
     const count = chat.messages.length
     if (count > prevMsgCountRef.current) {
@@ -155,12 +156,12 @@ export default function ChatPage({ dark, onToggleDark, isLoggedIn, user, onLogou
     prevMsgCountRef.current = count
   }, [chat.messages])
 
-  // Sync mode with active session
+  // ── Sync mode with active session ────────────────
   useEffect(() => {
     if (chat.activeSession?.mode) setMode(chat.activeSession.mode)
   }, [chat.activeSession?.id])
 
-  // ── User picks a PDF from the file browser ──────
+  // ── File select handler ───────────────────────────
   const handleFileSelect = useCallback(async (file) => {
     if (file.type !== 'application/pdf') {
       alert('Only PDF files are supported.')
@@ -170,10 +171,8 @@ export default function ChatPage({ dark, onToggleDark, isLoggedIn, user, onLogou
       alert('File too large. Maximum size is 100MB.')
       return
     }
-
     const title  = file.name.replace(/\.pdf$/i, '')
     const result = await doc.uploadDoc(file, title)
-
     if (result.success) {
       setActiveDoc(result.data)
     } else {
@@ -181,7 +180,7 @@ export default function ChatPage({ dark, onToggleDark, isLoggedIn, user, onLogou
     }
   }, [doc])
 
-  // ── Send message ─────────────────────────────────
+  // ── Send message ──────────────────────────────────
   const handleSend = useCallback((text) => {
     if (activeDoc) {
       const docId = activeDoc._id || activeDoc.documentId
@@ -255,7 +254,6 @@ export default function ChatPage({ dark, onToggleDark, isLoggedIn, user, onLogou
             border-b border-theme flex-shrink-0"
           style={{ background: 'var(--bg-secondary)' }}
         >
-          {/* Left */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileOpen(o => !o)}
@@ -267,19 +265,17 @@ export default function ChatPage({ dark, onToggleDark, isLoggedIn, user, onLogou
             <div className="lg:hidden"><Logo size="sm" /></div>
           </div>
 
-          {/* Centre: mode selector */}
           <div className="hidden sm:block">
             <ModeSelector value={mode} onChange={handleModeChange} compact />
           </div>
 
-          {/* Right */}
           <div className="flex items-center gap-2">
             <DarkModeToggle dark={dark} onToggle={onToggleDark} />
             {isLoggedIn && <UserMenu user={user} onLogout={onLogout} />}
           </div>
         </header>
 
-        {/* Mode selector — mobile only */}
+        {/* Mode selector — mobile */}
         <div
           className="sm:hidden px-3 py-2 border-b border-theme"
           style={{ background: 'var(--bg-secondary)' }}
@@ -309,7 +305,6 @@ export default function ChatPage({ dark, onToggleDark, isLoggedIn, user, onLogou
         >
           <div className="max-w-3xl md:max-w-4xl xl:max-w-5xl mx-auto">
 
-            {/* Mode hint */}
             {!activeDoc && currentModeInfo && (
               <div className="flex items-center gap-1.5 mb-2">
                 <currentModeInfo.icon
