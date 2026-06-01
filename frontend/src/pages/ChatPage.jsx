@@ -122,9 +122,9 @@ function UserMenu({ user, onLogout }) {
 // PLACEHOLDER TEXT PER MODE
 // ============================================
 const PLACEHOLDERS = {
-  doubt: 'Ask a doubt… e.g. "Explain Kirchhoff\'s laws"',
-  exam:  'What topic to revise? e.g. "DBMS important questions"',
-  viva:  'Practice viva… e.g. "Ask me about Computer Networks"',
+  doubt:      'Ask a doubt… e.g. "Explain Kirchhoff\'s laws"',
+  exam:       'What topic to revise? e.g. "DBMS important questions"',
+  viva:       'Practice viva… e.g. "Ask me about Computer Networks"',
   exam_blast: 'Exam tomorrow! eg. "Operating Systems" or "DBMS"',
 }
 
@@ -142,12 +142,18 @@ export default function ChatPage({ dark, onToggleDark, isLoggedIn, user, onLogou
   // Active document — null = normal chat, object = document-aware chat
   const [activeDoc, setActiveDoc]          = useState(null)
 
-  const bottomRef = useRef(null)
+  const bottomRef      = useRef(null)
+  const prevMsgCountRef = useRef(0)
 
-  // Auto-scroll on new messages
+  // ── Auto-scroll only when a NEW message is added ──
+  // Does NOT fire on session switch (prevents scroll lock)
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [chat.messages, chat.isLoading])
+    const count = chat.messages.length
+    if (count > prevMsgCountRef.current) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+    prevMsgCountRef.current = count
+  }, [chat.messages])
 
   // Sync mode with active session
   useEffect(() => {
@@ -155,9 +161,7 @@ export default function ChatPage({ dark, onToggleDark, isLoggedIn, user, onLogou
   }, [chat.activeSession?.id])
 
   // ── User picks a PDF from the file browser ──────
-  // Called by ChatInput when paperclip is clicked and file is selected
   const handleFileSelect = useCallback(async (file) => {
-    // Frontend validation before sending to backend
     if (file.type !== 'application/pdf') {
       alert('Only PDF files are supported.')
       return
@@ -167,14 +171,10 @@ export default function ChatPage({ dark, onToggleDark, isLoggedIn, user, onLogou
       return
     }
 
-    // Use filename as title (strip .pdf extension)
-    const title = file.name.replace(/\.pdf$/i, '')
-
-    // Upload the document — useDocument handles progress tracking
+    const title  = file.name.replace(/\.pdf$/i, '')
     const result = await doc.uploadDoc(file, title)
 
     if (result.success) {
-      // Auto-set as active document after upload completes
       setActiveDoc(result.data)
     } else {
       alert(result.error || 'Upload failed. Please try again.')
@@ -201,7 +201,6 @@ export default function ChatPage({ dark, onToggleDark, isLoggedIn, user, onLogou
     setMobileOpen(false)
   }
 
-  // Clear document context — return to normal chat
   const handleDocClear = useCallback(() => {
     setActiveDoc(null)
     doc.clearActiveDocument()
@@ -213,7 +212,6 @@ export default function ChatPage({ dark, onToggleDark, isLoggedIn, user, onLogou
     exam_blast: '⚡ Tell me your subject — I\'ll give you only what matters for tomorrow\'s exam.',
   }
 
-  // Placeholder updates when document is active
   const placeholder = activeDoc
     ? `Ask anything about "${activeDoc.title || activeDoc.originalName}"…`
     : PLACEHOLDERS[mode]
@@ -232,7 +230,7 @@ export default function ChatPage({ dark, onToggleDark, isLoggedIn, user, onLogou
 
       {/* ── Sidebar ──────────────────────────────── */}
       <div className={`
-        fixed lg:relative z-40 h-full transition-transform duration-300
+        fixed lg:relative z-40 h-full transition-transform duration-300 flex-shrink-0
         ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         <Sidebar
@@ -290,13 +288,13 @@ export default function ChatPage({ dark, onToggleDark, isLoggedIn, user, onLogou
         </div>
 
         {/* ── Messages area ────────────────────── */}
-        <div className="flex-1 overflow-y-auto py-4">
+        <div className="flex-1 overflow-y-auto py-4 min-h-0">
           {chat.messages.length === 0 ? (
             <WelcomeScreen mode={mode} onSuggestion={handleSend} />
           ) : (
-            <div className="max-w-3xl mx-auto space-y-1 pb-4">
+            <div className="max-w-3xl md:max-w-4xl xl:max-w-5xl mx-auto space-y-1 pb-4">
               {chat.messages.map(msg => (
-                <ChatBubble key={msg.id} message={msg} />
+                <ChatBubble key={msg.id} message={msg} mode={mode} />
               ))}
               {chat.isLoading && <TypingIndicator />}
               <div ref={bottomRef} />
@@ -309,24 +307,29 @@ export default function ChatPage({ dark, onToggleDark, isLoggedIn, user, onLogou
           className="flex-shrink-0 border-t border-theme px-4 py-4"
           style={{ background: 'var(--bg-secondary)' }}
         >
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-3xl md:max-w-4xl xl:max-w-5xl mx-auto">
 
-            {/* Mode hint — only shown when no document is active */}
+            {/* Mode hint */}
             {!activeDoc && currentModeInfo && (
               <div className="flex items-center gap-1.5 mb-2">
-                <currentModeInfo.icon size={12} className={mode === 'exam_blast' ? 'text-orange-400' : 'text-muted'} />
-                <span className={`text-xs font-medium ${mode === 'exam_blast' ? 'text-orange-400' : 'text-muted'}`}>
+                <currentModeInfo.icon
+                  size={12}
+                  className={mode === 'exam_blast' ? 'text-orange-400' : 'text-muted'}
+                />
+                <span className={`text-xs font-medium ${
+                  mode === 'exam_blast' ? 'text-orange-400' : 'text-muted'
+                }`}>
                   {MODE_HINTS[mode] || currentModeInfo.desc}
                 </span>
               </div>
             )}
 
-            {/* Chat input — paperclip now handles file upload */}
             <ChatInput
               onSend={handleSend}
               isLoading={chat.isLoading}
               onStop={chat.stopGeneration}
               placeholder={placeholder}
+              mode={mode}
               onFileSelect={handleFileSelect}
               isUploading={doc.isUploading}
               uploadProgress={doc.uploadProgress}

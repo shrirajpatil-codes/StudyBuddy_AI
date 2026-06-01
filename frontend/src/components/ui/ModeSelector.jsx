@@ -1,28 +1,69 @@
 // components/ui/ModeSelector.jsx
-// Pill-style mode switcher: Doubt | Exam Prep | Viva Practice
-
 import React from 'react'
 import { HelpCircle, BookOpen, Mic, Zap } from 'lucide-react'
 
 export const MODES = [
-  { id: 'doubt', label: 'Doubt',     icon: HelpCircle, color: 'brand',  desc: 'Get instant answers to your academic questions' },
-  { id: 'exam',  label: 'Exam Prep', icon: BookOpen,   color: 'violet', desc: 'Summarise topics, revision notes, practice Qs' },
-  { id: 'viva',  label: 'Viva',      icon: Mic,        color: 'green',  desc: 'Simulate oral exams with model answers' },
-  { id: 'exam_blast', label: '1-Day Exam', icon: Zap, color: 'orange', desc: 'Exam is tomorrow - get only what matters most'},
+  {
+    id:    'doubt',
+    label: 'Doubt',
+    icon:  HelpCircle,
+    color: 'indigo',
+    desc:  'Get instant answers to your academic questions',
+    active: 'bg-indigo-500 text-white shadow-sm',
+    dot:    'bg-indigo-400',
+    ring:   'border-indigo-400',
+    card:   'border-indigo-400 bg-indigo-50 dark:bg-indigo-900/30',
+    cardIcon:'bg-indigo-500 text-white',
+    cardText:'text-indigo-600 dark:text-indigo-300',
+  },
+  {
+    id:    'exam',
+    label: 'Exam Prep',
+    icon:  BookOpen,
+    color: 'violet',
+    desc:  'Summarise topics, revision notes, practice Qs',
+    active: 'bg-violet-500 text-white shadow-sm',
+    dot:    'bg-violet-400',
+    ring:   'border-violet-400',
+    card:   'border-violet-400 bg-violet-50 dark:bg-violet-900/30',
+    cardIcon:'bg-violet-500 text-white',
+    cardText:'text-violet-600 dark:text-violet-300',
+  },
+  {
+    id:    'viva',
+    label: 'Viva',
+    icon:  Mic,
+    color: 'emerald',
+    desc:  'Simulate oral exams with model answers',
+    active: 'bg-emerald-500 text-white shadow-sm',
+    dot:    'bg-emerald-400',
+    ring:   'border-emerald-400',
+    card:   'border-emerald-400 bg-emerald-50 dark:bg-emerald-900/30',
+    cardIcon:'bg-emerald-500 text-white',
+    cardText:'text-emerald-600 dark:text-emerald-300',
+  },
+  {
+    id:    'exam_blast',
+    label: '1-Day Exam',
+    icon:  Zap,
+    color: 'orange',
+    desc:  'Exam is tomorrow — get only what matters most',
+    active: 'bg-orange-500 text-white shadow-sm',
+    dot:    'bg-orange-400',
+    ring:   'border-orange-400',
+    card:   'border-orange-400 bg-orange-50 dark:bg-orange-900/30',
+    cardIcon:'bg-orange-500 text-white',
+    cardText:'text-orange-600 dark:text-orange-300',
+  },
 ]
 
-const colorMap = {
-  brand:  { active: 'bg-brand-500 text-white shadow-glow-sm', dot: 'bg-brand-400' },
-  violet: { active: 'bg-violet-500 text-white',                dot: 'bg-violet-400' },
-  green:  { active: 'bg-green-500 text-white',                 dot: 'bg-green-400' },
-  orange: {active: 'bg-orange-500 text-white',                  dot: 'bg-orange-400'},
-}
-
 export default function ModeSelector({ value, onChange, compact = false }) {
+
+  /* ── Compact pill row (used in top navbar) ── */
   if (compact) {
     return (
       <div
-        className="flex gap-1 p-1 rounded-xl overflow-x-auto max-w-[420px] scrollbar-hide"
+        className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide"
         style={{ background: 'var(--bg-primary)' }}
       >
         {MODES.map(m => {
@@ -34,9 +75,9 @@ export default function ModeSelector({ value, onChange, compact = false }) {
               onClick={() => onChange(m.id)}
               title={m.desc}
               className={`
-                flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold
+                flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
                 transition-all duration-200 cursor-pointer whitespace-nowrap flex-shrink-0
-                ${active ? colorMap[m.color].active : 'text-muted hover:text-theme'}
+                ${active ? m.active : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]'}
               `}
             >
               <Icon size={13} />
@@ -48,12 +89,12 @@ export default function ModeSelector({ value, onChange, compact = false }) {
     )
   }
 
+  /* ── Full grid (used in sidebar) ── */
   return (
     <div className="grid grid-cols-2 gap-2">
       {MODES.map(m => {
         const Icon   = m.icon
         const active = value === m.id
-        const c      = colorMap[m.color]
         return (
           <button
             key={m.id}
@@ -62,15 +103,17 @@ export default function ModeSelector({ value, onChange, compact = false }) {
               flex flex-col items-center gap-1.5 p-3 rounded-xl border
               transition-all duration-200 cursor-pointer text-center
               ${active
-                ? 'border-brand-400 bg-brand-light dark:bg-brand-900/40'
-                : 'border-theme bg-card hover:border-brand-300 hover:bg-brand-50 dark:hover:bg-brand-900/20'
+                ? m.card
+                : 'border-[var(--border)] bg-[var(--bg-card)] hover:border-[var(--brand)] hover:bg-[var(--bg-primary)]'
               }
             `}
           >
-            <div className={`p-2 rounded-lg ${active ? c.active : 'bg-gray-100 dark:bg-white/10 text-muted'}`}>
+            <div className={`p-2 rounded-lg transition-all
+              ${active ? m.cardIcon : 'bg-gray-100 dark:bg-white/10 text-[var(--text-muted)]'}`}>
               <Icon size={16} />
             </div>
-            <span className={`text-xs font-semibold ${active ? 'text-brand-600 dark:text-brand-300' : 'text-muted'}`}>
+            <span className={`text-xs font-semibold transition-colors
+              ${active ? m.cardText : 'text-[var(--text-muted)]'}`}>
               {m.label}
             </span>
           </button>
